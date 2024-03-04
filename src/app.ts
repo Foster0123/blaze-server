@@ -1,29 +1,31 @@
+// NPM Packages
 import 'dotenv/config'
-import express from 'express'
+import express, { Router } from 'express'
 import cors from 'cors'
-import connection from './configs/db.config.js'
+
+// Configurations
 import server from './configs/server.config.js'
 
-const app = express();
+// Routers
+import homeRouter from './modules/home/home.router.js'
+import loginRouter from './modules/login/login.router.js'
+
+// Globals
+const app = express()
+const router = Router()
+
+// Registered Features
 app.use(cors())
 app.use(express.json())
-app.use(express.urlencoded({ extended:true }))
+app.use(express.urlencoded({ extended: true }))
 
-app.get("/", async (_, res) => {
-    const statement = 'SELECT * FROM users';
-    const data = await connection.query(statement)
-    res.send(data[0]);
+// Registered Routes
+app.use((req, _, next) => {
+    console.log(`METHOD : ${req.method} | URL : ${req.url}`)
+    next()
 })
-
-app.get("/:id", async (req, res) => {
-    const id = req.params.id;
-    const statement = `SELECT * FROM users WHERE uid=?`
-    const data = await connection.query(statement, [id])
-    res.send(data[0])
-})
-
-app.get("/account", (_, res) => {
-    res.sendStatus(200);
-})
+app.use(router)
+router.use('/home', homeRouter)
+router.use('/login', loginRouter)
 
 app.listen(process.env.APP_PORT, server)

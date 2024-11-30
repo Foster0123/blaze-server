@@ -14,17 +14,23 @@ datasource db {
 }
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
-  posts Post[]
+  id        Int     @default(autoincrement()) @id
+  name      String?
+  username 	String?
+  email 	String  @unique
+  password 	String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+  todo Todo[]
 }
 
-model Post {
-  id        Int      @default(autoincrement()) @id
-  title     String
-  content   String?
-  published Boolean? @default(false)
+model Todo {
+  id        	Int      @default(autoincrement()) @id
+  title     	String
+  descripton   	String?
+  status		Boolean?
+  created_at 	DateTime @default(now())
+  updated_at	DateTime @updatedAt()
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  Int?
 }

@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty } from 'class-validator'
-export class AuthDto {
+export class SignupDto {
     
     @IsNotEmpty()
     readonly name : string
@@ -14,4 +14,12 @@ export class AuthDto {
     @IsNotEmpty()
     readonly password : string
 
+}
+export class SigninDto {
+    @IsNotEmpty()
+    @IsEmail()
+    readonly email : string
+
+    @IsNotEmpty()
+    readonly password : string
 }

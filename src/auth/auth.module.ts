@@ -6,8 +6,16 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy';
 
 @Module({
-  imports: [PrismaModule, JwtModule.register({})],
+  imports: [
+    PrismaModule,
+    JwtModule.register(
+      {
+        signOptions: {
+          expiresIn: process.env.JWT_VALIDITY
+        },
+        secret: process.env.JWT_SECRET
+      })],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy]
 })
-export class AuthModule {}
+export class AuthModule { }

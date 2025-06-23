@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Redirect } from '@nestjs/common';
 import * as argon from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SigninDto, SignupDto } from './dto';
@@ -9,20 +9,50 @@ export class AuthService {
     constructor(private prisma: PrismaService, private jwt: JwtService) { }
     async signup(dto: SignupDto) {
         const hash = await argon.hash(dto.password)
-        const user = await this.prisma.user.create({
-            data: {
-                name: dto.name,
-                username: dto.username,
-                email: dto.email,
-                password: hash
+        const checkEmail = await this.prisma.user.findUnique({
+            where: {
+                email: dto.email
             },
             select: {
-                name: true,
-                username: true,
                 email: true
             }
         })
-        return `You are signed up`
+        const checkUsername = await this.prisma.user.findUnique({
+            where: { 
+                username: dto.username 
+            },
+            select: { 
+                username: true 
+            }
+        })
+        console.log(checkEmail, checkUsername)
+        if (!checkEmail && !checkUsername) {
+            const user = await this.prisma.user.create({
+                data: {
+                    name: dto.name,
+                    username: dto.username,
+                    email: dto.email,
+                    password: hash
+                },
+                select: {
+                    name: true,
+                    username: true,
+                    email: true
+                }
+            })
+            return { user : user }
+        }
+        else {
+            if (checkEmail && checkUsername) {
+                return 'Email & Username Already Taken'
+            }
+            if (checkEmail) {
+                return 'Email Is In Use'
+            }
+            if (checkUsername) {
+                return 'Username Is In Use'
+            }
+        }
     }
 
     async signin(dto: SigninDto) {
@@ -44,19 +74,22 @@ export class AuthService {
         // Get The User Logged In
         if (user && passwordMatch) {
 
-            return this.signWithJwt(user.name, user.username, user.email)
+            return this.signWithJwt(user.id, user.name, user.username, user.email)
         }
         else {
             return 'Invalid Credentials'
         }
     }
 
-    async signWithJwt(name: string, username: string, email: string): Promise<{access_token: string}> {
+    async signWithJwt(id: number , name: string, username: string, email: string): Promise<{ access_token: string }> {
         const payload = {
-            userId: name, username, email
+            id: id,
+            name, 
+            username, 
+            email
         }
-        const token = await this.jwt.signAsync(payload, {
-            secret: process.env.JWT_SECRET
+        const token = await this.jwt.signAsync(payload,  {
+            secret: process.env.JWT_SECRET,
         })
         return { access_token: token }
     }

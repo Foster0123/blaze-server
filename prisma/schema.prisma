@@ -6,12 +6,11 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../../node_modules/@prisma/postgresql/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("POSTGRES_DB_URL")
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -23,7 +22,19 @@ model User {
   password           String?
   created_at         DateTime            @default(now())
   updated_at         DateTime            @updatedAt()
+  todo               Todo[]
   additional_details AdditionalDetails[]
+}
+
+model Todo {
+  id         Int      @id @default(autoincrement())
+  title      String
+  descripton String?
+  status     Boolean?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+  author     User?    @relation(fields: [authorId], references: [id])
+  authorId   Int?
 }
 
 model AdditionalDetails {

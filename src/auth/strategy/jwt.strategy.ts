@@ -1,9 +1,9 @@
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { PostgresService } from "src/database/postgres.service";
+import { PrismaService } from "src/prisma/prisma.service";
 
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
-    constructor(private readonly prisma: PostgresService) {
+    constructor(private readonly prisma: PrismaService) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: process.env.JWT_SECRET

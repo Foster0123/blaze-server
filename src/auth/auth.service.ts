@@ -1,12 +1,12 @@
 import { ForbiddenException, Injectable, Redirect } from '@nestjs/common';
 import * as argon from 'argon2';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PostgresService } from 'src/database/postgres.service';
 import { SigninDto, SignupDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaService, private jwt: JwtService) { }
+    constructor(private prisma: PostgresService, private jwt: JwtService) { }
     async signup(dto: SignupDto) {
         const hash = await argon.hash(dto.password)
         const checkEmail = await this.prisma.user.findUnique({
